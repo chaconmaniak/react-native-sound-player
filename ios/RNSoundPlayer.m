@@ -6,6 +6,11 @@
 
 #import "RNSoundPlayer.h"
 
+@interface RNSoundPlayer ()
+@property (nonatomic) bool loopEnabled;
+@property (nonatomic) bool mixAudio;
+@end
+
 @implementation RNSoundPlayer
 
 static NSString *const EVENT_FINISHED_LOADING = @"FinishedLoading";
@@ -34,6 +39,14 @@ RCT_EXPORT_METHOD(loadSoundFile:(NSString *)name ofType:(NSString *)type) {
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[EVENT_FINISHED_PLAYING, EVENT_FINISHED_LOADING, EVENT_FINISHED_LOADING_URL, EVENT_FINISHED_LOADING_FILE];
+}
+
+RCT_EXPORT_METHOD(loops:(BOOL)enabled) {
+    self.loopEnabled = enabled;
+}
+
+RCT_EXPORT_METHOD(mixesAudio:(BOOL)enabled) {
+    self.mixAudio = enabled;
 }
 
 RCT_EXPORT_METHOD(pause) {
@@ -136,13 +149,22 @@ RCT_REMAP_METHOD(getInfo,
     }
 
     NSURL *soundFileURL = [NSURL fileURLWithPath:soundFilePath];
+    int numberOfLoops = self.loopEnabled ? -1 : 0;
+    
     self.player = [[AVAudioPlayer alloc] initWithContentsOfURL:soundFileURL error:nil];
     [self.player setDelegate:self];
-    [self.player setNumberOfLoops:0];
+    [self.player setNumberOfLoops:numberOfLoops];
     [self.player prepareToPlay];
-    [[AVAudioSession sharedInstance]
-            setCategory: AVAudioSessionCategoryPlayback
-            error: nil];
+    if (self.mixAudio) {
+        [[AVAudioSession sharedInstance]
+             setCategory:AVAudioSessionCategoryPlayAndRecord
+             withOptions:AVAudioSessionCategoryOptionMixWithOthers
+             error:nil];
+    } else {
+        [[AVAudioSession sharedInstance]
+             setCategory:AVAudioSessionCategoryPlayback
+             error:nil];
+    }
     [self sendEventWithName:EVENT_FINISHED_LOADING body:@{@"success": [NSNumber numberWithBool:true]}];
     [self sendEventWithName:EVENT_FINISHED_LOADING_FILE body:@{@"success": [NSNumber numberWithBool:true], @"name": name, @"type": type}];
 }

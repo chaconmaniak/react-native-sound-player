@@ -99,5 +99,14 @@ export default {
       _finishedLoadingListener.remove()
       _finishedLoadingListener = undefined
     }
-  }
+  },
+
+  loops: (enabled: boolean) => {
+    RNSoundPlayer.loops(enabled)
+  },
+
+  mixesAudio: (enabled: boolean) => {
+    RNSoundPlayer.mixesAudio(enabled)
+  },
+
 }
