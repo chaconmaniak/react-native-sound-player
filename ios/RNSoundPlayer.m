@@ -158,7 +158,7 @@ RCT_REMAP_METHOD(getInfo,
     if (self.mixAudio) {
         [[AVAudioSession sharedInstance]
              setCategory:AVAudioSessionCategoryPlayAndRecord
-             withOptions:AVAudioSessionCategoryOptionMixWithOthers
+             withOptions:AVAudioSessionCategoryOptionMixWithOthers|AVAudioSessionCategoryOptionDefaultToSpeaker
              error:nil];
     } else {
         [[AVAudioSession sharedInstance]
